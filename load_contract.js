@@ -15,17 +15,16 @@ if (account.address != address) {
 
 console.log(account.address);
 
-var contract_address = "0xd34997f977aa146F0d8b9156d097d4504cD04Ebc";
+var contract_address = "0x42686C872fe0031bA6BD84Aa2ACd2Ab4a1b699fA";
 var abi = [{"constant":false,"inputs":[{"name":"_number","type":"uint256"}],"name":"setNumber","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"getNumber","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"}];
 
 var myContract = new web3.eth.Contract(abi, contract_address);
 // console.log(myContract.options.jsonInterface);
 
-// myContract.methods.getNumber().call({from: address}, function(error, result){
-//     if (!error) {
-//         console.log(result);
-//     } else {
-//         console.log(error);
-//     }
-// });
-console.log(myContract.methods.getNumber().call());
+myContract.methods.getNumber().call({from: address}, function(error, result){
+    if (!error) {
+        console.log(result);
+    } else {
+        console.log(error);
+    }
+});
