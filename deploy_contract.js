@@ -28,10 +28,14 @@ myContract.deploy({
 .send({
     from: address,
     gas: 2000000, // gas limit
-    gasPrice: 1000000 // gas price in wei
+    // gasPrice: 1000000 // gas price in wei
 }, function(error, transactionHash){ 
         console.log("Deploying...");
-        console.log(error); 
+        if (!error) {
+            console.log("Transaction hash: " + transactionHash);
+        } else {
+            console.log(error);
+        }
     })
     .on('error', function(error){
         console.log(error);
