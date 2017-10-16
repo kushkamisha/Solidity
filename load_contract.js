@@ -1,43 +1,66 @@
-// Read existing contract
-// In node http://136.243.173.186:8540
+/**
+ * Read existing contract from blockchain.
+ */
 
-const Web3 = require('web3');
-const fs = require('fs');
-const solc = require('solc');
+require('./connect.js');
 
-var web3 = new Web3("https://ropsten.infura.io/m2127IH3i4kuHoojavXS");
+// 0x70AC36C8FD90d25C1d9B778CC5cF447aFa744F92 - simple send money contract
+var contract_address = "0x70AC36C8FD90d25C1d9B778CC5cF447aFa744F92";
 
-var address = "0xB305F6450158cb61277E57d80925Fcca1e3AF8e2"; // in Ropsten
-var private_key = "0xe2dbf9358232158b14312e57944938810a771f891b761bed28a1e09544670afb";
+console.log("User address: " + account.address);
+console.log("Contract address: " + contract_address);
 
-var account = web3.eth.accounts.privateKeyToAccount(private_key);
-if (account.address != address) {
-    console.log('plz enter valid address private key');
-}
 
-console.log("Account: " + account.address);
-
-/*
-* Compile Fetch ABI
-*/ 
-var source = fs.readFileSync("../HelloWorldContract.sol", 'utf8');
+// Compile ABI.
+var source = fs.readFileSync("../drop.sol", 'utf8');
 console.log('Getting ABI...');
 var compiledContract = solc.compile(source);
 
 for (var contractName in compiledContract.contracts) {
     var abi = JSON.parse(compiledContract.contracts[contractName].interface);
+
+    var myContract = new web3.eth.Contract(abi, contract_address);
+
+    // getter();
+
+    myContract.methods.replenish().send({
+        from: account.address,
+        gas: 2000000, // gas limit
+        value: 10000, // How much money send to the function
+        // gasPrice: 1000000 // gas price in wei
+    }, function(error, transactionHash){
+            if (!error) {
+                console.log("Transaction hash: " + transactionHash);
+            } else {
+                console.log(error);
+            }
+        })
+        .on('error', function(error){
+            console.log(error);
+        })
+        // .on('transactionHash', function(transactionHash){ ... })
+        .on('receipt', function(receipt){
+           console.log(receipt.contractAddress) // contains the new contract address
+        })
+        .on('confirmation', function(confirmationNumber, receipt){
+            console.log("Confirmations: " + confirmationNumber);
+        })
+        .then(function(newContractInstance){
+            console.log(newContractInstance.options) // instance with the new contract address
+        });
 }
-var _abi = 'ABI: ' + JSON.stringify(abi, undefined, 2);
 
-var contract_address = "0x835b3b1B710c168C3A8231F4B345401eF2D2820f";
 
-var myContract = new web3.eth.Contract(abi, contract_address);
-console.log("ABI: " + myContract.options.jsonInterface);
+/**
+ * Additional functions zone.
+ */
 
-myContract.methods.getWord().call({from: address}, function(error, result){
-    if (!error) {
-        console.log(result);
-    } else {
-        console.log(error);
-    }
-});
+function getter() {
+    myContract.methods.getContractBalance().call({from: address}, function(error, result){
+        if (!error) {
+            console.log(result);
+        } else {
+            console.log(error);
+        }
+    });
+}
